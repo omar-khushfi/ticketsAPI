@@ -28,6 +28,7 @@ urlpatterns = [
      path('rest/fbv/<int:pk>',views.fdv_pk),
      #4
      path('rest/cbv/',views.cbv_list.as_view()),
+    path('rest/cbv/<int:pk>',views.cbv_pk.as_view()),
    
     
 ]

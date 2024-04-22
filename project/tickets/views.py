@@ -6,6 +6,7 @@ from rest_framework.decorators import api_view
 from rest_framework import status,filters
 from .serializers import *
 from rest_framework.views import APIView
+from django.http import Http404
 # Create your views here.
 
 ######1 whithout rest and no model
@@ -41,7 +42,7 @@ def no_rest_from_model(request):
 
 
 #####3 function based viwes 
-# 3.1 GET POST 
+# 3 GET POST 
 
 @api_view(['GET','POST'])
 def fbv_list(request):
@@ -61,7 +62,7 @@ def fbv_list(request):
         else:
             return Response(serializer.data,status=status.HTTP_400_BAD_REQUEST)
 
-# 3.1 GET DELETE PUT 
+# 3 GET DELETE PUT 
 @api_view(['GET','PUT','DELETE'])
 def fdv_pk(request,pk):
     try:
@@ -89,7 +90,7 @@ def fdv_pk(request,pk):
 
 
 ####4
-#cbv 4.1 list and create  GET and POST
+#cbv 4 list and create  GET and POST
 
 class cbv_list(APIView):
     def get(self,request):
@@ -105,3 +106,31 @@ class cbv_list(APIView):
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         return Response(serializer.data,status=status.HTTP_400_BAD_REQUEST)
         
+        
+#cbv 4 PUT DELETE GET
+class cbv_pk(APIView):
+    def get_object(self,pk):
+        try:
+            return Guest.objects.get(pk=pk)
+        except Guest.DoesNotExist:
+            raise Http404
+        
+    def get(self,request,pk):
+        guest=self.get_object(pk)
+       
+        serializer=Guestserializer(guest)
+        return Response(serializer.data)
+    
+    def put(self,request,pk):
+        guest=self.get_object(pk)   
+        serializer=Guestserializer(guest,data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+        
+    def DELETE(self,request,pk):
+        guest=self.get_object(pk) 
+        guest.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
