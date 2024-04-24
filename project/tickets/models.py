@@ -17,5 +17,7 @@ class Reservation(models.Model):
     movie=models.ForeignKey(Movie,related_name='reservation',on_delete=models.CASCADE)
     
     
+
+    
     
     

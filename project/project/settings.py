@@ -37,8 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'tickets',
     'rest_framework',
+    'tickets',
+    
 ]
 REST_FRAMEWORK={}
 MIDDLEWARE = [

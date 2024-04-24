@@ -7,12 +7,13 @@ from rest_framework import status,filters
 from .serializers import *
 from rest_framework.views import APIView
 from django.http import Http404
+from rest_framework import generics,mixins,viewsets
+
 # Create your views here.
 
 ######1 whithout rest and no model
 
 def no_rest_no_model(request):
-
     guests=[
         {
             'id':1,
@@ -25,7 +26,7 @@ def no_rest_no_model(request):
             'name':"ahmad",
             'mobile':4532,
             
-        }
+        },
     ]
     return JsonResponse(guests,safe=False)
     
@@ -117,7 +118,6 @@ class cbv_pk(APIView):
         
     def get(self,request,pk):
         guest=self.get_object(pk)
-       
         serializer=Guestserializer(guest)
         return Response(serializer.data)
     
@@ -134,3 +134,90 @@ class cbv_pk(APIView):
         guest=self.get_object(pk) 
         guest.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+
+# 5 mixing
+class mixing_list(mixins.ListModelMixin,mixins.CreateModelMixin,generics.GenericAPIView):
+    queryset=Guest.objects.all()
+    serializer_class=Guestserializer
+    
+    def get(self,request):
+        return self.list(request)
+    def post(self,request):
+        return self.create(request)
+    
+
+class mixing_pk(mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.DestroyModelMixin,generics.GenericAPIView):
+    queryset=Guest.objects.all()
+    serializer_class=Guestserializer
+    
+    def get(self,request,pk):
+        return self.retrieve(request)   
+    def put(self,request,pk):
+        return self.update(request)
+    def delete(self,request,pk):
+        return self.destory(request)
+# 6 generics
+class generics_list(generics.ListCreateAPIView):
+    queryset=Guest.objects.all()
+    serializer_class=Guestserializer
+    
+    
+class generics_pk(generics.RetrieveUpdateDestroyAPIView):
+    queryset=Guest.objects.all()
+    serializer_class=Guestserializer
+    
+    
+#7 viewset
+class viewsets_guests(viewsets.ModelViewSet):
+    queryset=Guest.objects.all()
+    serializer_class=Guestserializer
+    
+    
+
+class viewsets_movie(viewsets.ModelViewSet):
+    queryset=Movie.objects.all()
+    serializer_class=Movieserializer
+    filter_backend=[filters.SearchFilter]
+    serarch_fielde=['movie']
+
+class viewsets_reservation(viewsets.ModelViewSet):
+    queryset=Reservation.objects.all()
+    serializer_class=Reservationserializer
+
+
+#8  find movie
+
+api_view(['GET'])
+def find_movie(request):
+    movie=Movie.objects.filter(
+        hall=request.data['hall'],
+        movie=request.data['movie']
+    )
+    serializer=Movieserializer(movie,many=True)
+    return Response(serializer.data)
+
+#9
+
+@api_view(['POST'])
+def new_reservation(request):
+   
+    try:
+        movie = Movie.objects.get(
+            hall=request.data['hall'],
+            movie=request.data['movie'],
+        )
+    except Movie.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    guest = Guest()
+    guest.name = request.data['name']
+    guest.mobile = request.data['mobile']
+    guest.save()
+
+    reservation = Reservation()
+    reservation.guest = guest
+    reservation.movie = movie
+    reservation.save()
+
+    # Correct status code
+    return Response(status=status.HTTP_201_CREATED)
