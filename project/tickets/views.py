@@ -8,7 +8,9 @@ from .serializers import *
 from rest_framework.views import APIView
 from django.http import Http404
 from rest_framework import generics,mixins,viewsets
-
+from rest_framework.authentication import BasicAuthentication,TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from .permissions import *
 # Create your views here.
 
 ######1 whithout rest and no model
@@ -161,11 +163,20 @@ class mixing_pk(mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.Destroy
 class generics_list(generics.ListCreateAPIView):
     queryset=Guest.objects.all()
     serializer_class=Guestserializer
+    # authentication_classes=[BasicAuthentication]
+    # permission_classes=[IsAuthenticated]
+    ########################
+    authentication_classes=[TokenAuthentication]
+    
     
     
 class generics_pk(generics.RetrieveUpdateDestroyAPIView):
     queryset=Guest.objects.all()
     serializer_class=Guestserializer
+    # authentication_classes=[BasicAuthentication]
+    # permission_classes=[IsAuthenticated]
+    #########################
+    authentication_classes=[TokenAuthentication]
     
     
 #7 viewset
@@ -221,3 +232,9 @@ def new_reservation(request):
 
     # Correct status code
     return Response(status=status.HTTP_201_CREATED)
+
+#10 author
+class Post_pk(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes=[IsRuthorReadOrReadOnly]
+    queryset=Post.objects.all()
+    serializer_class=Postserializer

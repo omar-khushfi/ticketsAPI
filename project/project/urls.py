@@ -18,6 +18,11 @@ from django.contrib import admin
 from django.urls import path,include
 from tickets import views
 from rest_framework.routers import DefaultRouter
+from rest_framework.authtoken.views import obtain_auth_token
+
+
+
+
 router=DefaultRouter()
 router.register('guests',views.viewsets_guests)
 router.register('movie',views.viewsets_movie)
@@ -46,7 +51,13 @@ urlpatterns = [
      path('findmovie/',views.find_movie),
      #9
        path('newreservation/',views.new_reservation),
-    
+       #10 auth url
+       path('rest-auth',include('rest_framework.urls')),
+       #11 token
+       path('api-token-auth',obtain_auth_token),
+    #12
+    path('post/gin/<int:pk>',views.Post_pk.as_view),
+       path('post/gin/',views.Post_pk.as_view)
 
     
 ]
